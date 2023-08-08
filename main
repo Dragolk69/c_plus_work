@@ -1,0 +1,87 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <algorithm>
+#include <iomanip>
+
+class Subject {
+public:
+    std::string name;
+    int marks;
+
+    Subject(const std::string& n, int m) : name(n), marks(m) {}
+};
+
+class Student {
+public:
+    std::string name;
+    int rollNumber;
+    std::vector<Subject> subjects;
+    int totalMarks;
+    int schoolRank;
+    int classRank;
+
+    Student(const std::string& n, int roll) : name(n), rollNumber(roll), totalMarks(0), schoolRank(0), classRank(0) {}
+
+    void calculateTotalMarks() {
+        totalMarks = 0;
+        for (const Subject& subject : subjects) {
+            totalMarks += subject.marks;
+        }
+    }
+};
+
+bool compareTotalMarks(const Student& s1, const Student& s2) {
+    return s1.totalMarks > s2.totalMarks;
+}
+
+void calculateRanks(std::vector<Student>& students) {
+    std::sort(students.begin(), students.end(), compareTotalMarks);
+
+    int rank = 1;
+    for (size_t i = 0; i < students.size(); ++i) {
+        students[i].schoolRank = rank;
+        
+        if (i > 0 && students[i].totalMarks != students[i - 1].totalMarks) {
+            rank = i + 1;
+        }
+    }
+    
+    // Calculate class ranks (Assuming students are already sorted by total marks)
+    int currentRoll = students[0].rollNumber;
+    int classRank = 1;
+    for (size_t i = 0; i < students.size(); ++i) {
+        if (students[i].rollNumber != currentRoll) {
+            currentRoll = students[i].rollNumber;
+            classRank = 1;
+        }
+        students[i].classRank = classRank;
+        ++classRank;
+    }
+}
+
+void displayRanks(const std::vector<Student>& students) {
+    std::cout << std::setw(10) << "Name" << std::setw(10) << "Roll" << std::setw(10) << "Total" << std::setw(10) << "School" << std::setw(10) << "Class" << std::endl;
+    for (const Student& student : students) {
+        std::cout << std::setw(10) << student.name << std::setw(10) << student.rollNumber << std::setw(10) << student.totalMarks << std::setw(10) << student.schoolRank << std::setw(10) << student.classRank << std::endl;
+    }
+}
+
+int main() {
+    std::vector<Student> students;
+    
+    // Read student data from file and populate students vector
+    
+    // Calculate total marks for each student
+    for (Student& student : students) {
+        student.calculateTotalMarks();
+    }
+
+    // Calculate and assign ranks
+    calculateRanks(students);
+
+    // Display ranks
+    displayRanks(students);
+
+    return 0;
+}
